@@ -10,14 +10,17 @@ function SignupForm() {
 		email: "",
 		password: "",
 		rePassword: "",
+		degree: "",
+		degreeLevel: "",
+		international: false,
+		startYear: "",
+		endYear: "",
 	});
 
 	// Setup errors
 	const [errors, setErrors] = useState({});
 
 	// Setup dates
-	const [startYear, setStartYear] = useState("");
-	const [endYear, setEndYear] = useState("");
 	const currentYear = new Date().getFullYear();
 	// 10 years ago to this year
 	const startYears = Array.from(
@@ -30,39 +33,15 @@ function SignupForm() {
 		(val, index) => currentYear + index
 	);
 
-	// Degree levels
-	const [degree, setDegree] = useState("");
-	const [degreeLevel, setDegreeLevel] = useState("");
-
-	// Setup checkboxes
-	const [international, setInternational] = useState(false);
-
 	const navigate = useNavigate();
 
 	// Handle changes to form
-	const handleDegreeChange = (event) => {
-		setDegree(event.target.value);
-	};
-
-	const handleDegreeLevelChange = (event) => {
-		setDegreeLevel(event.target.value);
-	};
-
-	const handleCheckboxChange = (event) => {
-		setInternational(event.target.checked);
-	};
-
-	const handleStartYearChange = (event) => {
-		setStartYear(event.target.value);
-	};
-
-	const handleEndYearChange = (event) => {
-		setEndYear(event.target.value);
-	};
-
 	const handleChange = (event) => {
-		const { name, value } = event.target;
-		setUser((prevUser) => ({ ...prevUser, [name]: value }));
+		const { name, value, type, checked } = event.target;
+		setUser((prevUser) => ({
+			...prevUser,
+			[name]: type === "checkbox" ? checked : value,
+		}));
 	};
 
 	// Form validation
@@ -72,12 +51,14 @@ function SignupForm() {
 		// Every field (except international cannot be empty)
 		// Check if any field in the user object is empty
 		Object.keys(user).forEach((key) => {
-			// Trim the value to check for spaces only entries as well
-			if (!user[key].trim()) {
-				errors[key] = "Field cannot be empty";
+			if (typeof user[key] === "string") {
+				// Trim the value to check for spaces only entries as well
+				if (!user[key].trim()) {
+					errors[key] = "Field cannot be empty";
+				}
 			}
 		});
-
+		console.log(errors);
 		if (!errors) {
 			// University Email: Checks that has an @ followed by a dot
 			if (!/\S+@\S+\.\S+/.test(user.email))
@@ -120,7 +101,7 @@ function SignupForm() {
 				<input
 					type="text"
 					name="firstName"
-					value={user.name}
+					value={user.firstName}
 					onChange={handleChange}
 					placeholder="First Name"
 				/>
@@ -130,7 +111,7 @@ function SignupForm() {
 				<input
 					type="text"
 					name="lastName"
-					value={user.name}
+					value={user.lastName}
 					onChange={handleChange}
 					placeholder="Last Name"
 				/>
@@ -171,8 +152,8 @@ function SignupForm() {
 			<div>
 				<label>
 					Degree
-					<select value={degree} onChange={handleDegreeChange}>
-						<option value="" disabled selected>
+					<select value={user.degree} onChange={handleChange} name="degree">
+						<option value="" disabled>
 							Select a degree
 						</option>
 						<option value="1">Biology</option>
@@ -187,12 +168,17 @@ function SignupForm() {
 						<option value="10">Physics</option>
 					</select>
 				</label>
+				{errors.degree && <p style={{ color: "red" }}>{errors.degree}</p>}
 			</div>
 			<div>
 				<label>
 					Degree Level
-					<select value={degreeLevel} onChange={handleDegreeLevelChange}>
-						<option value="" disabled selected>
+					<select
+						value={user.degreeLevel}
+						onChange={handleChange}
+						name="degreeLevel"
+					>
+						<option value="" disabled>
 							Select a degree level
 						</option>
 						<option value="1">Bachelor's</option>
@@ -200,13 +186,17 @@ function SignupForm() {
 						<option value="3">Doctorate</option>
 					</select>
 				</label>
+				{errors.degreeLevel && (
+					<p style={{ color: "red" }}>{errors.degreeLevel}</p>
+				)}
 			</div>
 			<div>
 				<label>
 					<input
+						name="international"
 						type="checkbox"
-						checked={international}
-						onChange={handleCheckboxChange}
+						checked={user.international}
+						onChange={handleChange}
 					/>
 					International student
 				</label>
@@ -215,8 +205,12 @@ function SignupForm() {
 			<div>
 				<label>
 					Start Year
-					<select value={startYear} onChange={handleStartYearChange}>
-						<option value="" disabled selected>
+					<select
+						value={user.startYear}
+						onChange={handleChange}
+						name="startYear"
+					>
+						<option value="" disabled>
 							Select a year
 						</option>
 						{startYears.map((year) => (
@@ -226,12 +220,13 @@ function SignupForm() {
 						))}
 					</select>
 				</label>
+				{errors.startYear && <p style={{ color: "red" }}>{errors.startYear}</p>}
 			</div>
 			<div>
 				<label>
 					End Year
-					<select value={endYear} onChange={handleEndYearChange}>
-						<option value="" disabled selected>
+					<select value={user.endYear} onChange={handleChange} name="endYear">
+						<option value="" disabled>
 							Select a year
 						</option>
 						{endYears.map((year) => (
@@ -241,6 +236,7 @@ function SignupForm() {
 						))}
 					</select>
 				</label>
+				{errors.endYear && <p style={{ color: "red" }}>{errors.endYear}</p>}
 			</div>
 			<button type="submit">Sign Up</button>
 		</form>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -21,6 +21,10 @@ function SignupForm() {
 	// Setup errors
 	const [errors, setErrors] = useState({});
 
+	// Setup states for fetching degrees and degreelevels
+	const [degrees, setDegrees] = useState([]);
+	const [degreeLevels, setDegreeLevels] = useState([]);
+
 	// Setup dates
 	const currentYear = new Date().getFullYear();
 	// 10 years ago to this year
@@ -35,6 +39,32 @@ function SignupForm() {
 	);
 
 	const navigate = useNavigate();
+	useEffect(() => {
+		// Fetch degrees
+		const fetchDegrees = async () => {
+			try {
+				const response = await axios.get("http://127.0.0.1:3001/api/degrees");
+				setDegrees(response.data.degrees);
+			} catch (error) {
+				console.error("Error fetching degrees:", error);
+			}
+		};
+
+		// Fetch degree levels
+		const fetchDegreeLevels = async () => {
+			try {
+				const response = await axios.get(
+					"http://127.0.0.1:3001/api/degreelevels"
+				);
+				setDegreeLevels(response.data.degreeLevels);
+			} catch (error) {
+				console.error("Error fetching degree levels:", error);
+			}
+		};
+
+		fetchDegrees();
+		fetchDegreeLevels();
+	}, []); // Empty dependency array means this effect runs once on mount
 
 	// Handle changes to form
 	const handleChange = (event) => {
@@ -172,16 +202,11 @@ function SignupForm() {
 						<option value="" disabled>
 							Select a degree
 						</option>
-						<option value="1">Biology</option>
-						<option value="2">Business</option>
-						<option value="3">Chemistry</option>
-						<option value="4">Computer Science</option>
-						<option value="5">Engineering</option>
-						<option value="6">English</option>
-						<option value="7">History</option>
-						<option value="8">Law</option>
-						<option value="9">Medicine</option>
-						<option value="10">Physics</option>
+						{degrees.map((degree) => (
+							<option key={degree.degreeid} value={degree.degreeid}>
+								{degree.degreename}
+							</option>
+						))}
 					</select>
 				</label>
 				{errors.degree && <p style={{ color: "red" }}>{errors.degree}</p>}
@@ -197,9 +222,11 @@ function SignupForm() {
 						<option value="" disabled>
 							Select a degree level
 						</option>
-						<option value="1">Bachelor's</option>
-						<option value="2">Master's</option>
-						<option value="3">Doctorate</option>
+						{degreeLevels.map((level) => (
+							<option key={level.degreelevelid} value={level.degreelevelid}>
+								{level.degreelevelname}
+							</option>
+						))}
 					</select>
 				</label>
 				{errors.degreeLevel && (

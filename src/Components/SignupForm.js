@@ -16,6 +16,7 @@ function SignupForm() {
 		international: false,
 		startYear: "",
 		endYear: "",
+		interests: [],
 	});
 
 	// Setup errors
@@ -24,6 +25,7 @@ function SignupForm() {
 	// Setup states for fetching degrees and degreelevels
 	const [degrees, setDegrees] = useState([]);
 	const [degreeLevels, setDegreeLevels] = useState([]);
+	const [interests, setInterests] = useState([]);
 
 	// Setup dates
 	const currentYear = new Date().getFullYear();
@@ -62,17 +64,37 @@ function SignupForm() {
 			}
 		};
 
+		// Fetch interests
+		const fetchInterests = async () => {
+			try {
+				const response = await axios.get("http://127.0.0.1:3001/api/interests");
+				setInterests(response.data.interests);
+			} catch (error) {
+				console.error("Error fetching interests:", error);
+			}
+		};
+
 		fetchDegrees();
 		fetchDegreeLevels();
+		fetchInterests();
 	}, []); // Empty dependency array means this effect runs once on mount
 
 	// Handle changes to form
 	const handleChange = (event) => {
 		const { name, value, type, checked } = event.target;
-		setUser((prevUser) => ({
-			...prevUser,
-			[name]: type === "checkbox" ? checked : value,
-		}));
+		if (type === "checkbox" && name === "interests") {
+			setUser((prevUser) => ({
+				...prevUser,
+				interests: checked
+					? [...prevUser.interests, value]
+					: prevUser.interests.filter((interestId) => interestId !== value),
+			}));
+		} else {
+			setUser((prevUser) => ({
+				...prevUser,
+				[name]: type === "checkbox" ? checked : value,
+			}));
+		}
 	};
 
 	// Form validation
@@ -280,6 +302,25 @@ function SignupForm() {
 					</select>
 				</label>
 				{errors.endYear && <p style={{ color: "red" }}>{errors.endYear}</p>}
+			</div>
+			<div>
+				<label>Interests</label>
+				{interests.map((interest) => (
+					<div key={interest.interestid}>
+						<label>
+							<input
+								name="interests"
+								type="checkbox"
+								value={interest.interestid}
+								checked={user.interests.includes(
+									interest.interestid.toString()
+								)}
+								onChange={handleChange}
+							/>
+							{interest.interestname}
+						</label>
+					</div>
+				))}
 			</div>
 			<button type="submit">Sign Up</button>
 		</form>

@@ -134,10 +134,7 @@ function SignupForm() {
 		setErrors(validationErrors);
 		if (Object.keys(validationErrors).length === 0) {
 			try {
-				const response = await axios.post(
-					"http://127.0.0.1:3001/api/signup",
-					user
-				);
+				await axios.post("http://127.0.0.1:3001/api/signup", user);
 				navigate("/user-profile");
 			} catch (error) {
 				console.log(error.response);

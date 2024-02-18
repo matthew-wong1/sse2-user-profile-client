@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 function SignupForm() {
 	// Setup all user-typed fields
 	const [user, setUser] = useState({
+		username: "",
 		firstName: "",
 		lastName: "",
 		email: "",
@@ -58,7 +59,7 @@ function SignupForm() {
 				}
 			}
 		});
-		console.log(errors);
+
 		if (!errors) {
 			// University Email: Checks that has an @ followed by a dot
 			if (!/\S+@\S+\.\S+/.test(user.email))
@@ -70,9 +71,6 @@ function SignupForm() {
 			if (user.password !== user.rePassword)
 				errors.rePassword = "Passwords must match";
 		}
-		// Backend will query Hipo API
-
-		// Duplicate checks in backend
 
 		return errors;
 	};
@@ -84,12 +82,20 @@ function SignupForm() {
 		setErrors(validationErrors);
 		if (Object.keys(validationErrors).length === 0) {
 			try {
-				const response = await axios.post("http://localhost:5000/signup", user);
-				navigate(`/user-info/${response.data.userId}`, {
-					state: { user: response.data },
-				});
+				const response = await axios.post(
+					"http://127.0.0.1:3001/api/signup",
+					user
+				);
+				navigate("/user-profile");
 			} catch (error) {
-				console.error("There was an error signing up:", error);
+				console.log(error.response);
+				if (error.response && error.response.data.errors) {
+					// Directly set the errors object from the backend to the state
+					console.log(error.response.data.errors);
+					setErrors(error.response.data.errors);
+				} else {
+					console.error("There was an error signing up:", error);
+				}
 			}
 		}
 	};
@@ -97,6 +103,16 @@ function SignupForm() {
 	// Render form
 	return (
 		<form onSubmit={handleSubmit}>
+			<div>
+				<input
+					type="text"
+					name="username"
+					value={user.username}
+					onChange={handleChange}
+					placeholder="Username"
+				/>
+				{errors.username && <p style={{ color: "red" }}>{errors.username}</p>}
+			</div>
 			<div>
 				<input
 					type="text"
